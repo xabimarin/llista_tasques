@@ -4,6 +4,7 @@ import flask
 import app_tasques
 import json
 import tasca
+import usuari
 
 app = flask.Flask(__name__)
 core_app = app_tasques.App_tasques()
@@ -46,5 +47,38 @@ def tasks():
         return flask.jsonify(llista_jsons), 200                 #retorna_jason + Content-type:application/json
 
     
+@app.route('/registre', methods=['POST'])
+def registre():
+    info_body = flask.request.get_data()    
+    usuari_nou = json.loads(info_body)      
+    objecte_usuari = usuari.Usuari(
+        None, usuari_nou["nom"],
+        usuari_nou["nick"],
+        usuari_nou["password"]
+        )   
+    resultat = core_app.registre(objecte_usuari)
+    if resultat:
+        return "",201
+    return "", 400
 
-app.run(host="0.0.0.0")
+@app.route('/login', methods=['POST'])
+def login():
+    info_body = flask.request.get_data()    
+    usuari_nou = json.loads(info_body)      
+    objecte_usuari = usuari.Usuari(
+        None, None,
+        usuari_nou["nick"],
+        usuari_nou["password"]
+    )
+    resultat = core_app.login(objecte_usuari.nick, objecte_usuari.password)
+    if resultat:
+        return flask.jsonify({"api_key":resultat}), 201
+    return "", 403
+
+
+
+
+
+
+app.run(host="0.0.0.0", 
+        debug=False)
